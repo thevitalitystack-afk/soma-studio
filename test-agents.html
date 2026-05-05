@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { margin: 0; padding: 20px; background: #000; color: #fff; font-family: sans-serif; }
+  .room { 
+    width: 100px; height: 100px; 
+    background: #111; border: 1px solid #333; border-radius: 10px; 
+    position: relative; margin: 20px; display: inline-block;
+  }
+  .agent {
+    position: absolute; inset: 0; margin: auto;
+    width: 32px; height: 32px;
+    background: url('/assets/agents-sprite.png') 0 0 no-repeat;
+    background-size: 32px auto;
+    cursor: grab;
+  }
+  .agent:active { cursor: grabbing; }
+  .agent.pixie { background-position: -32px 0; }
+  .agent.sage { background-position: -64px 0; }
+  .agent.kairo { background-position: -96px 0; }
+  h3 { margin: 0 0 10px 0; font-size: 14px; }
+</style>
+</head>
+<body>
+  <h3>Drag the agents around!</h3>
+  <div class="room"><div class="agent luna"></div></div>
+  <div class="room"><div class="agent pixie"></div></div>
+  <div class="room"><div class="agent sage"></div></div>
+  <div class="room"><div class="agent kairo"></div></div>
+  
+  <script>
+    document.querySelectorAll('.agent').forEach(el => {
+      let startX, startY, translateX = 0, translateY = 0;
+      
+      el.addEventListener('mousedown', (e) => {
+        startX = e.clientX; startY = e.clientY;
+        el.style.cursor = 'grabbing';
+      });
+      
+      document.addEventListener('mousemove', (e) => {
+        if (el.style.cursor !== 'grabbing') return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        el.style.transform = `translate(${dx}px, ${dy}px)`;
+      });
+      
+      document.addEventListener('mouseup', () => {
+        el.style.cursor = 'grab';
+        translateX += parseInt(el.style.transform.match(/translate\(([^)])/)?.[1] || 0);
+        translateY += parseInt(el.style.transform.match(/,\s*([^)])/)?.[1] || 0);
+      });
+    });
+  </script>
+</body>
+</html>

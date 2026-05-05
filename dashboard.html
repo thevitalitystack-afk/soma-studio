@@ -1,0 +1,1276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<title>SOMA Studio · the floor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..600;1,9..144,200..500&family=Inter+Tight:wght@200..600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  /* =====================================================================
+     Tokens — sibling to /Users/zaka/Claude/new soma/apps/console
+     ===================================================================== */
+  :root{
+    --bg:#000000;
+    --bg-1:#0a0a0c;
+    --bg-2:#111114;
+    --bg-3:#16161a;
+    --bg-4:#1c1c22;
+    --bg-glass:rgba(14,14,16,0.72);
+
+    --border:#222228;
+    --border-soft:#1a1a1f;
+    --hairline:rgba(255,255,255,0.05);
+
+    --text:#ebe7dd;
+    --text-2:#a8a39a;
+    --text-3:#6b6b75;
+    --text-4:#4a4a52;
+
+    --ember:#c8a878;
+    --ember-strong:#d6b88a;
+    --ember-soft:rgba(200,168,120,0.10);
+    --ember-line:rgba(200,168,120,0.30);
+    --ember-glow:rgba(200,168,120,0.22);
+
+    --ok:#a3ffb4;
+    --warn:#ffb968;
+    --err:#ff6b6b;
+    --info:#7fb8ff;
+
+    --font-serif:'Fraunces',ui-serif,Georgia,serif;
+    --font-sans:'Inter Tight',-apple-system,system-ui,sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,monospace;
+
+    --tracking-label:0.22em;
+    --ease:cubic-bezier(0.2,0.8,0.2,1);
+
+    --radius-sm:8px;
+    --radius:10px;
+    --radius-md:12px;
+    --radius-lg:14px;
+
+    --topbar-h:64px;
+    --rail-w:300px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{
+    background:var(--bg);color:var(--text);
+    font-family:var(--font-sans);font-weight:300;
+    letter-spacing:-0.005em;-webkit-font-smoothing:antialiased;
+    height:100%;overflow:hidden;
+  }
+  button,a{cursor:pointer;text-decoration:none;background:none;border:none;color:inherit;font:inherit;font-family:inherit}
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--bg-3);border-radius:4px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--bg-4)}
+
+  .serif{font-family:var(--font-serif);font-weight:300;letter-spacing:-0.01em}
+  .it{font-style:italic}
+  .mono{font-family:var(--font-mono)}
+  .tracking{letter-spacing:var(--tracking-label);text-transform:uppercase}
+
+  /* =====================================================================
+     Page-level moody photo wash + film-grain
+     ===================================================================== */
+  .canvas-wash{
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse 60% 45% at 14% 8%, rgba(200,168,120,0.05), transparent 65%),
+      radial-gradient(ellipse 55% 50% at 92% 102%, rgba(80,90,110,0.05), transparent 70%),
+      linear-gradient(180deg,#08080a 0%,#000 100%);
+  }
+  .canvas-wash::before{
+    /* Ultra-subtle moody photo wash — Fuji at twilight feel via gradient */
+    content:"";position:absolute;inset:0;opacity:0.05;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 100%, rgba(60,70,90,0.45), transparent 70%),
+      radial-gradient(ellipse 40% 25% at 50% 38%, rgba(245,239,230,0.10), transparent 60%);
+    mix-blend-mode:screen;
+  }
+  .canvas-wash::after{
+    /* Film grain */
+    content:"";position:absolute;inset:0;opacity:0.04;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch' seed='5'/><feColorMatrix values='0 0 0 0 0.96  0 0 0 0 0.93  0 0 0 0 0.90  0 0 0 0.6 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>");
+    mix-blend-mode:overlay;
+  }
+
+  /* =====================================================================
+     Layout · top bar · floor · right rail
+     ===================================================================== */
+  body{
+    display:grid;
+    grid-template-rows:var(--topbar-h) 1fr;
+    grid-template-columns:1fr var(--rail-w);
+    grid-template-areas:
+      "topbar topbar"
+      "floor  rail";
+    position:relative;z-index:1;
+  }
+
+  /* ── TOP BAR ───────────────────────────────────────────────────────── */
+  .topbar{
+    grid-area:topbar;
+    display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:28px;
+    padding:0 28px;
+    background:var(--bg-glass);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border-soft);
+    position:relative;z-index:5;
+  }
+  /* Brand */
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand-mark{
+    width:30px;height:30px;border-radius:50%;
+    border:1px solid var(--ember);position:relative;flex-shrink:0;
+    box-shadow:0 0 0 1px rgba(200,168,120,0.06), 0 0 22px -6px var(--ember-glow);
+  }
+  .brand-mark::after{
+    content:'';position:absolute;inset:50% auto auto 50%;
+    width:5px;height:5px;border-radius:50%;background:var(--ember);
+    transform:translate(-50%,-50%);box-shadow:0 0 10px var(--ember);
+    animation:emberBreath 4s ease-in-out infinite;
+  }
+  @keyframes emberBreath{0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.18)}}
+  .brand-name{font-family:var(--font-serif);font-weight:300;font-size:20px;letter-spacing:-0.005em;color:var(--text)}
+  .brand-name em{font-style:italic;color:var(--ember);font-weight:300}
+
+  /* Goal + progress */
+  .goal{
+    display:flex;align-items:center;gap:18px;
+    padding:10px 22px;border-left:1px solid var(--border-soft);border-right:1px solid var(--border-soft);
+    height:100%;min-width:0;
+  }
+  .goal-block{flex:1;min-width:0}
+  .goal-label{font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:var(--tracking-label);text-transform:uppercase;display:flex;align-items:center;gap:8px}
+  .goal-label::before{content:'';width:14px;height:1px;background:var(--ember-line)}
+  .goal-text{
+    font-family:var(--font-serif);font-weight:300;font-size:15px;color:var(--text);
+    letter-spacing:-0.005em;margin-top:4px;line-height:1.45;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .goal-text em{font-style:italic;color:var(--ember)}
+  .goal-progress{
+    display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;min-width:140px;
+  }
+  .goal-bar{position:relative;width:140px;height:2px;background:var(--bg-3);overflow:hidden}
+  .goal-bar-fill{position:absolute;inset:0 auto 0 0;width:14%;background:var(--ember);box-shadow:0 0 12px var(--ember-glow)}
+  .goal-pct{font-family:var(--font-mono);font-size:10px;color:var(--ember);letter-spacing:0.06em}
+  .goal-pct .of{color:var(--text-3);margin-left:6px}
+
+  /* Controls */
+  .controls{display:flex;align-items:center;gap:10px}
+  .cost-pill{
+    display:flex;align-items:center;gap:14px;
+    padding:9px 14px;border:1px solid var(--border-soft);border-radius:var(--radius);
+    background:var(--bg-2);
+  }
+  .cost-pill .col{display:flex;flex-direction:column;line-height:1.2}
+  .cost-pill .col .lbl{font-family:var(--font-mono);font-size:8.5px;color:var(--text-3);letter-spacing:var(--tracking-label);text-transform:uppercase}
+  .cost-pill .col .val{font-family:var(--font-serif);font-size:14px;color:var(--text);font-weight:300;margin-top:2px}
+  .cost-pill .col .val em{font-style:italic;color:var(--ember)}
+  .cost-pill .sep{width:1px;height:22px;background:var(--border-soft)}
+
+  .gostop{
+    position:relative;display:flex;align-items:center;gap:10px;
+    padding:9px 18px;border-radius:var(--radius);
+    background:var(--ember);color:#0a0805;
+    font-family:var(--font-serif);font-weight:400;font-size:14px;letter-spacing:0.02em;
+    box-shadow:
+      0 0 0 1px rgba(200,168,120,0.4),
+      0 0 24px -2px var(--ember-glow),
+      inset 0 0 16px rgba(255,236,200,0.08);
+    transition:all .25s var(--ease);
+  }
+  .gostop:hover{background:var(--ember-strong);box-shadow:0 0 0 1px var(--ember),0 0 36px -2px var(--ember-glow)}
+  .gostop .pulse{
+    width:7px;height:7px;border-radius:50%;background:#0a0805;
+    box-shadow:0 0 0 2px rgba(10,8,5,0.18);animation:goPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes goPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.5}}
+  .gostop.is-paused{background:transparent;color:var(--text);box-shadow:0 0 0 1px var(--border)}
+  .gostop.is-paused .pulse{background:var(--text-3);box-shadow:none}
+  .gostop em{font-style:italic;color:#3a2a14;font-weight:300}
+  .gostop.is-paused em{color:var(--text-3)}
+
+  /* ── FLOOR (the perfect-square grid) ─────────────────────────────── */
+  .floor{
+    grid-area:floor;
+    position:relative;overflow:auto;
+    padding:32px 32px 32px 32px;
+  }
+  .floor-eyebrow{
+    display:flex;align-items:center;gap:14px;
+    font-family:var(--font-mono);font-size:10px;color:var(--ember);
+    letter-spacing:var(--tracking-label);text-transform:uppercase;margin-bottom:22px;
+  }
+  .floor-eyebrow::before{content:'';width:18px;height:1px;background:var(--ember)}
+  .floor-eyebrow .meta{margin-left:auto;color:var(--text-3);font-size:9.5px;letter-spacing:0.18em}
+  .floor-eyebrow .meta b{color:var(--text);font-weight:400}
+
+  .grid{
+    --cell-gap:18px;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-auto-rows:auto;
+    gap:var(--cell-gap);
+    /* Each cell forces aspect-ratio:1/1 — rows auto-size to match column width.
+       Result: perfect 1:1 squares, perfectly equal in width and height. */
+    align-content:start;
+  }
+
+  /* Each cell forced perfect square */
+  .room{
+    position:relative;aspect-ratio:1/1;
+    border-radius:var(--radius-lg);
+    background:var(--bg-1);
+    border:1px solid var(--hairline);
+    overflow:hidden;cursor:pointer;
+    transition:transform .35s var(--ease), border-color .35s var(--ease), box-shadow .45s var(--ease);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.02) inset,
+      0 24px 60px -28px rgba(0,0,0,0.7);
+  }
+  .room:hover{transform:translateY(-2px);border-color:var(--ember-line);box-shadow:0 28px 70px -26px rgba(0,0,0,0.8), 0 0 0 1px var(--ember-line) inset}
+  .room.is-active{
+    border-color:rgba(200,168,120,0.34);
+    box-shadow:
+      inset 0 0 0 1px rgba(200,168,120,0.16),
+      inset 0 0 60px rgba(200,168,120,0.05),
+      0 0 36px -6px var(--ember-glow),
+      0 28px 70px -26px rgba(0,0,0,0.8);
+  }
+
+  /* Room photo wash placeholder — different gradient per sector */
+  .room-photo{
+    position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(ellipse 80% 60% at 70% 20%, rgba(60,70,86,0.30), transparent 65%),
+      radial-gradient(ellipse 70% 60% at 22% 90%, rgba(40,32,28,0.45), transparent 70%),
+      linear-gradient(170deg, rgba(35,30,26,0.55) 0%, rgba(12,12,14,0.85) 60%, rgba(10,10,12,0.95) 100%);
+    filter:saturate(0.85);
+  }
+  .room-photo::after{
+    content:'';position:absolute;inset:0;opacity:0.5;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch' seed='3'/><feColorMatrix values='0 0 0 0 0.8  0 0 0 0 0.7  0 0 0 0 0.55  0 0 0 0.32 0'/></filter><rect width='400' height='400' filter='url(%23f)'/></svg>");
+  }
+  .room[data-tone="atlas"]    .room-photo{background:radial-gradient(ellipse 70% 50% at 30% 25%, rgba(60,55,70,0.35), transparent 65%), radial-gradient(ellipse 70% 60% at 80% 100%, rgba(20,18,22,0.6), transparent 70%), linear-gradient(170deg,#1d1a1a 0%,#0a090a 90%)}
+  .room[data-tone="brand"]    .room-photo{background:radial-gradient(ellipse 70% 55% at 75% 25%, rgba(110,75,55,0.32), transparent 65%), radial-gradient(ellipse 70% 60% at 18% 100%, rgba(30,22,18,0.55), transparent 70%), linear-gradient(170deg,#231a14 0%,#0c0907 90%)}
+  .room[data-tone="youtube"]  .room-photo{background:radial-gradient(ellipse 70% 55% at 50% 30%, rgba(80,72,90,0.32), transparent 65%), radial-gradient(ellipse 70% 60% at 80% 100%, rgba(36,30,40,0.55), transparent 70%), linear-gradient(170deg,#1a181f 0%,#0a090c 90%)}
+  .room[data-tone="forges"]   .room-photo{background:radial-gradient(ellipse 70% 55% at 25% 30%, rgba(120,80,40,0.22), transparent 65%), radial-gradient(ellipse 70% 60% at 80% 100%, rgba(28,22,18,0.55), transparent 70%), linear-gradient(170deg,#1c1814 0%,#0a0908 90%)}
+  .room[data-tone="research"] .room-photo{background:radial-gradient(ellipse 70% 55% at 75% 30%, rgba(60,80,90,0.28), transparent 65%), radial-gradient(ellipse 70% 60% at 18% 100%, rgba(20,24,28,0.55), transparent 70%), linear-gradient(170deg,#171a1d 0%,#08090a 90%)}
+  .room[data-tone="empty"]    .room-photo{background:repeating-linear-gradient(135deg, rgba(255,255,255,0.012) 0 6px, transparent 6px 14px), linear-gradient(180deg,#0a0a0c,#08080a)}
+
+  /* Active rooms: warm ember inner glow + soft halo */
+  .room.is-active::before{
+    content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    box-shadow:
+      inset 0 0 90px rgba(200,168,120,0.06),
+      inset 0 0 0 1px rgba(200,168,120,0.18);
+    animation:roomHalo 5.5s ease-in-out infinite;
+  }
+  @keyframes roomHalo{0%,100%{box-shadow:inset 0 0 70px rgba(200,168,120,0.05),inset 0 0 0 1px rgba(200,168,120,0.16)}50%{box-shadow:inset 0 0 110px rgba(200,168,120,0.09),inset 0 0 0 1px rgba(200,168,120,0.26)}}
+
+  /* Room contents */
+  .room-inner{
+    position:relative;z-index:2;height:100%;
+    padding:22px 22px 18px;
+    display:grid;grid-template-rows:auto 1fr auto;
+  }
+  .room-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .room-eyebrow{font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:var(--tracking-label);text-transform:uppercase;display:flex;align-items:center;gap:8px}
+  .room-eyebrow .room-code{color:var(--ember)}
+  .room.is-active .room-eyebrow .live{display:inline-flex;align-items:center;gap:6px;color:var(--ember)}
+  .room-eyebrow .live .dot{width:5px;height:5px;border-radius:50%;background:var(--ember);box-shadow:0 0 8px var(--ember);animation:emberBreath 2.4s ease-in-out infinite}
+  .room-meta{font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:0.16em;text-transform:uppercase}
+  .room-meta b{color:var(--text-2);font-weight:400}
+
+  .room-title{
+    font-family:var(--font-serif);font-weight:300;font-size:30px;line-height:1.05;
+    color:var(--text);letter-spacing:-0.02em;margin-top:10px;
+  }
+  .room-title em{font-style:italic;color:var(--ember)}
+  .room-sub{
+    font-family:var(--font-serif);font-weight:300;font-style:italic;font-size:13px;
+    color:var(--text-2);line-height:1.55;margin-top:6px;max-width:78%;
+  }
+
+  /* Agent dots zone (center-ish) */
+  .agent-zone{
+    position:relative;align-self:center;
+    width:100%;height:100%;min-height:0;
+  }
+  .agent-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .agent-svg .ag-ring{fill:none;stroke:rgba(200,168,120,0.14);stroke-width:0.6}
+  .agent-svg .ag-dot{fill:var(--text-4);transition:fill .4s var(--ease), filter .4s var(--ease), r .35s var(--ease)}
+  .agent-svg .ag-label{font-family:var(--font-mono);font-size:7px;letter-spacing:1.4px;fill:var(--text-3);text-transform:uppercase;opacity:0;transition:opacity .25s var(--ease)}
+  .agent-svg g.ag.is-active .ag-dot{fill:var(--ember);filter:drop-shadow(0 0 6px var(--ember-glow))}
+  .agent-svg g.ag.is-active .ag-label{fill:var(--ember-strong);opacity:0.95}
+  .agent-svg g.ag:hover .ag-label{opacity:1;fill:var(--text)}
+  .agent-svg g.ag{cursor:pointer}
+
+  /* Status line */
+  .room-status{
+    font-family:var(--font-serif);font-style:italic;font-weight:300;font-size:13px;
+    color:var(--text-2);line-height:1.45;
+    border-top:1px solid var(--hairline);padding-top:12px;margin-top:6px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .room-status .status-pip{width:6px;height:6px;border-radius:50%;background:var(--text-3);flex-shrink:0}
+  .room.is-active .room-status .status-pip{background:var(--ember);box-shadow:0 0 8px var(--ember);animation:emberBreath 2.6s ease-in-out infinite}
+  .room-status em{font-style:normal;color:var(--text);font-family:var(--font-sans);font-weight:400}
+
+  /* Empty / "add new sector" cell */
+  .room.empty{
+    border-style:dashed;border-color:rgba(255,255,255,0.06);
+    cursor:pointer;background:linear-gradient(180deg,rgba(255,255,255,0.005),transparent);
+  }
+  .room.empty .room-inner{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center}
+  .room.empty .plus{
+    width:46px;height:46px;border:1px solid var(--border);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;color:var(--text-3);
+    font-family:var(--font-serif);font-size:24px;font-weight:200;
+  }
+  .room.empty .plus-label{font-family:var(--font-mono);font-size:9.5px;color:var(--text-3);letter-spacing:var(--tracking-label);text-transform:uppercase}
+  .room.empty .plus-sub{font-family:var(--font-serif);font-style:italic;font-size:13px;color:var(--text-3);line-height:1.45;max-width:80%}
+  .room.empty:hover{border-color:var(--ember-line)}
+  .room.empty:hover .plus{color:var(--ember);border-color:var(--ember-line)}
+
+  /* ── RIGHT RAIL ──────────────────────────────────────────────────── */
+  .rail{
+    grid-area:rail;
+    border-left:1px solid var(--border-soft);background:var(--bg-1);
+    display:flex;flex-direction:column;min-height:0;height:100%;
+    position:relative;
+  }
+  .rail-section{padding:18px 18px;border-bottom:1px solid var(--border-soft)}
+  .rail-section:last-child{border-bottom:none}
+  .rail-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .rail-h-title{font-family:var(--font-mono);font-size:9.5px;color:var(--text-2);letter-spacing:var(--tracking-label);text-transform:uppercase;display:flex;align-items:center;gap:8px}
+  .rail-h-title::before{content:'';width:10px;height:1px;background:var(--ember-line)}
+  .rail-h .badge{
+    font-family:var(--font-mono);font-size:9px;color:var(--ember);
+    background:var(--ember-soft);border:1px solid var(--ember-line);
+    border-radius:999px;padding:2px 8px;letter-spacing:0.1em;
+  }
+
+  /* Live event feed */
+  .feed{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+  .feed-list{overflow-y:auto;flex:1;padding-right:2px}
+  .event{
+    padding:10px 0;border-bottom:1px solid var(--hairline);
+    animation:slidein .35s var(--ease) both;
+  }
+  .event:last-child{border-bottom:none}
+  @keyframes slidein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+  .event-meta{font-family:var(--font-mono);font-size:8.5px;color:var(--text-3);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:4px;display:flex;justify-content:space-between;gap:10px}
+  .event-meta b{color:var(--ember);font-weight:400}
+  .event-text{font-size:12.5px;color:var(--text);line-height:1.5;font-weight:300}
+  .event-text em{font-style:italic;color:var(--ember);font-family:var(--font-serif)}
+
+  /* Approval inbox */
+  .approval{
+    display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+    padding:10px 12px;background:var(--bg-2);border:1px solid var(--border-soft);
+    border-radius:10px;margin-bottom:8px;transition:all .2s var(--ease);
+  }
+  .approval:hover{border-color:var(--ember-line)}
+  .approval-from{font-family:var(--font-mono);font-size:8.5px;color:var(--ember);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:3px}
+  .approval-text{font-size:12px;color:var(--text);line-height:1.45;font-weight:300}
+  .approval-act{font-family:var(--font-mono);font-size:8.5px;color:var(--text-3);letter-spacing:0.16em;text-transform:uppercase;align-self:start;margin-top:2px}
+
+  /* Toggle list */
+  .toggle{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 0;font-size:12.5px;color:var(--text-2);font-weight:300;
+  }
+  .switch{
+    width:30px;height:16px;border-radius:8px;background:var(--bg-3);position:relative;cursor:pointer;
+    border:1px solid var(--border-soft);transition:all .2s var(--ease);
+  }
+  .switch::after{content:'';position:absolute;left:2px;top:1px;width:11px;height:11px;border-radius:50%;background:var(--text-3);transition:all .2s var(--ease)}
+  .switch.on{background:var(--ember-soft);border-color:var(--ember-line)}
+  .switch.on::after{left:16px;background:var(--ember);box-shadow:0 0 8px var(--ember-glow)}
+
+  /* Budget burn-down */
+  .burn{padding:6px 0}
+  .burn-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:baseline;padding:6px 0}
+  .burn-name{font-size:11.5px;color:var(--text-2);font-weight:300}
+  .burn-name .room-tag{font-family:var(--font-mono);font-size:8px;color:var(--text-4);letter-spacing:0.16em;text-transform:uppercase;margin-right:6px}
+  .burn-bar{
+    grid-column:1/-1;height:2px;background:var(--bg-3);position:relative;border-radius:2px;overflow:hidden;
+    margin-top:4px;
+  }
+  .burn-bar-fill{position:absolute;inset:0 auto 0 0;background:var(--ember);box-shadow:0 0 6px var(--ember-glow)}
+  .burn-bar-fill.warn{background:var(--warn)}
+  .burn-amt{font-family:var(--font-mono);font-size:10px;color:var(--text);letter-spacing:0.04em}
+  .burn-amt .of{color:var(--text-3)}
+
+  /* ── ROOM SLIDE-OUT PANEL ───────────────────────────────────────── */
+  .panel{
+    position:fixed;top:var(--topbar-h);right:0;bottom:0;
+    width:min(540px, 90vw);
+    background:linear-gradient(180deg,#0d0d10 0%,#08080a 100%);
+    border-left:1px solid var(--ember-line);
+    transform:translateX(105%);
+    transition:transform .55s var(--ease);
+    z-index:30;display:flex;flex-direction:column;
+    box-shadow:-30px 0 80px rgba(0,0,0,0.6);
+  }
+  .panel.is-open{transform:translateX(0)}
+  .panel-head{
+    padding:24px 28px 18px;border-bottom:1px solid var(--border-soft);
+    display:grid;grid-template-columns:1fr auto;gap:16px;
+  }
+  .panel-eyebrow{font-family:var(--font-mono);font-size:10px;color:var(--ember);letter-spacing:var(--tracking-label);text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .panel-eyebrow::before{content:'';width:14px;height:1px;background:var(--ember)}
+  .panel-title{font-family:var(--font-serif);font-weight:300;font-size:32px;line-height:1.05;letter-spacing:-0.02em;color:var(--text)}
+  .panel-title em{font-style:italic;color:var(--ember)}
+  .panel-sub{font-family:var(--font-serif);font-style:italic;font-weight:300;font-size:13.5px;color:var(--text-2);margin-top:6px}
+  .panel-close{
+    align-self:start;width:34px;height:34px;border-radius:8px;border:1px solid var(--border-soft);
+    background:var(--bg-2);color:var(--text-2);display:grid;place-items:center;font-size:16px;
+    transition:all .2s var(--ease);
+  }
+  .panel-close:hover{border-color:var(--ember-line);color:var(--ember)}
+
+  .panel-body{padding:18px 28px 36px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:24px}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .stat-card{
+    padding:14px;background:var(--bg-1);border:1px solid var(--border-soft);border-radius:var(--radius);
+  }
+  .stat-card .lbl{font-family:var(--font-mono);font-size:8.5px;color:var(--text-3);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:8px}
+  .stat-card .val{font-family:var(--font-serif);font-weight:300;font-size:22px;color:var(--text);letter-spacing:-0.01em}
+  .stat-card .val em{font-style:italic;color:var(--ember)}
+
+  .panel-section-h{font-family:var(--font-mono);font-size:10px;color:var(--text-2);letter-spacing:var(--tracking-label);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+  .panel-section-h::before{display:none}
+  .panel-section-h .ct{color:var(--text-3)}
+
+  .ticket{
+    display:grid;grid-template-columns:1fr auto;gap:8px;
+    padding:10px 0;border-bottom:1px solid var(--hairline);
+  }
+  .ticket .t-title{font-size:13px;color:var(--text);font-weight:300;line-height:1.4}
+  .ticket .t-meta{font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:0.06em;margin-top:4px}
+  .ticket .t-status{font-family:var(--font-mono);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;align-self:start;text-align:right}
+  .ticket .t-status.run{color:var(--ember)}
+  .ticket .t-status.queue{color:var(--text-3)}
+  .ticket .t-status.done{color:var(--ok)}
+
+  .agent-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .agent-card{
+    padding:14px;background:var(--bg-1);border:1px solid var(--border-soft);border-radius:var(--radius);
+    display:flex;flex-direction:column;align-items:flex-start;gap:8px;
+    transition:all .25s var(--ease);
+  }
+  .agent-card.is-active{border-color:var(--ember-line);box-shadow:inset 0 0 30px rgba(200,168,120,0.04)}
+  .agent-card .face{
+    width:40px;height:40px;border-radius:50%;
+    background:linear-gradient(135deg,#2a2622 0%,#16140f 100%);
+    border:1px solid var(--border-soft);display:grid;place-items:center;
+    font-family:var(--font-serif);font-style:italic;font-weight:300;font-size:18px;color:var(--text-2);
+    position:relative;
+  }
+  .agent-card.is-active .face{border-color:var(--ember-line);color:var(--ember);box-shadow:0 0 20px -4px var(--ember-glow)}
+  .agent-card.is-active .face::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(200,168,120,0.18);animation:ringPulse 2.6s ease-in-out infinite}
+  @keyframes ringPulse{0%,100%{transform:scale(1);opacity:.45}50%{transform:scale(1.12);opacity:.85}}
+  .agent-card .name{font-family:var(--font-serif);font-weight:300;font-size:14px;color:var(--text);letter-spacing:-0.005em}
+  .agent-card .role-line{font-size:11px;color:var(--text-3);line-height:1.4;font-weight:300}
+  .agent-card .ag-status{font-family:var(--font-mono);font-size:8.5px;color:var(--text-4);letter-spacing:0.16em;text-transform:uppercase;margin-top:auto}
+  .agent-card.is-active .ag-status{color:var(--ember)}
+
+  .recent .r-row{display:grid;grid-template-columns:60px 1fr;gap:12px;padding:8px 0;border-bottom:1px solid var(--hairline);font-size:12.5px;color:var(--text-2);line-height:1.5}
+  .recent .r-row:last-child{border:none}
+  .recent .r-time{font-family:var(--font-mono);font-size:9px;color:var(--text-4);letter-spacing:0.06em;align-self:start;padding-top:3px}
+  .recent strong{color:var(--ember);font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;font-weight:400}
+
+  /* Tooltip for hover on agent dots in floor */
+  .tt{
+    position:fixed;pointer-events:none;z-index:50;
+    background:var(--bg-glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border:1px solid var(--ember-line);border-radius:8px;
+    padding:8px 12px;min-width:140px;
+    font-size:11.5px;color:var(--text);
+    transform:translate(14px, -50%);opacity:0;transition:opacity .15s var(--ease);
+    box-shadow:0 16px 40px -10px rgba(0,0,0,0.6);
+  }
+  .tt.is-show{opacity:1}
+  .tt-name{font-family:var(--font-serif);font-size:14px;color:var(--ember);letter-spacing:-0.005em}
+  .tt-role{font-family:var(--font-serif);font-style:italic;font-size:11px;color:var(--text-2);margin-top:2px}
+  .tt-status{font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:0.16em;text-transform:uppercase;margin-top:5px}
+
+  /* ── Mobile mirror — cells stack ───────────────────────────────── */
+  @media (max-width: 860px){
+    body{
+      grid-template-columns:1fr;
+      grid-template-rows:auto auto auto;
+      grid-template-areas:
+        "topbar"
+        "floor"
+        "rail";
+      height:auto;overflow:auto;
+    }
+    html,body{overflow:auto}
+    .topbar{
+      flex-wrap:nowrap;height:auto;padding:14px 16px;gap:14px;
+      grid-template-columns:1fr auto;
+    }
+    .topbar > .goal{display:none}
+    .controls{flex-wrap:wrap;gap:8px;justify-content:flex-end}
+    .cost-pill{padding:6px 10px;gap:10px}
+    .cost-pill .col .val{font-size:12px}
+    .gostop{padding:8px 14px;font-size:13px}
+    .floor{padding:18px 14px;overflow:visible}
+    .grid{grid-template-columns:1fr;grid-template-rows:repeat(6,minmax(0,1fr))}
+    .room{aspect-ratio:1/1;max-width:520px;margin:0 auto;width:100%}
+    .room-title{font-size:26px}
+    .rail{
+      width:100%;border-left:none;border-top:1px solid var(--border-soft);
+      max-height:none;height:auto;
+    }
+    .panel{width:100%}
+  }
+</style>
+</head>
+<body>
+
+<div class="canvas-wash" aria-hidden="true"></div>
+
+<!-- ============================================================
+     TOP BAR
+     ============================================================ -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark"></span>
+    <span class="brand-name">SOMA <em>Studio</em></span>
+  </div>
+
+  <div class="goal">
+    <div class="goal-block">
+      <div class="goal-label">Company goal · Q4 2026</div>
+      <div class="goal-text">Reach <em>$10,000 / month</em> from a faceless YouTube channel — <em>quietly</em>, in the SOMA register.</div>
+    </div>
+    <div class="goal-progress">
+      <div class="goal-bar"><div class="goal-bar-fill" id="goalFill"></div></div>
+      <div class="goal-pct"><span id="goalPct">14%</span><span class="of">· 218 cycles</span></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="cost-pill" title="Today's spend / daily cap">
+      <div class="col"><span class="lbl">Today</span><span class="val"><em>$15.12</em></span></div>
+      <div class="sep"></div>
+      <div class="col"><span class="lbl">Cap · daily</span><span class="val">$50</span></div>
+    </div>
+    <button class="gostop" id="goBtn" aria-pressed="true">
+      <span class="pulse"></span>
+      <span id="goLabel">Studio is <em>working</em></span>
+    </button>
+  </div>
+</header>
+
+<!-- ============================================================
+     FLOOR — perfect 1:1 grid of sector rooms
+     ============================================================ -->
+<main class="floor">
+  <div class="floor-eyebrow">
+    <span>The studio floor</span>
+    <span class="meta">Five rooms · <b>26</b> hands · <b>9</b> currently working</span>
+  </div>
+
+  <section class="grid" id="grid">
+    <!-- Atlas Factory -->
+    <article class="room is-active" data-tone="atlas" data-room="atlas">
+      <div class="room-photo"></div>
+      <div class="room-inner">
+        <header class="room-head">
+          <div class="room-eyebrow">
+            <span class="room-code">A · 01</span>
+            <span class="live"><span class="dot"></span>working</span>
+          </div>
+          <div class="room-meta"><b>5</b> agents</div>
+        </header>
+        <div class="agent-zone"><svg class="agent-svg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" data-room-svg="atlas"></svg></div>
+        <div class="room-body" style="display:contents">
+          <h3 class="room-title">Atlas <em>Factory</em></h3>
+          <p class="room-sub">the room that runs the rooms</p>
+          <div class="room-status"><span class="status-pip"></span><em>Sentinel</em> just verified Episode 04 against the bible · PASS.</div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Brand Studio -->
+    <article class="room is-active" data-tone="brand" data-room="brand">
+      <div class="room-photo"></div>
+      <div class="room-inner">
+        <header class="room-head">
+          <div class="room-eyebrow">
+            <span class="room-code">B · 02</span>
+            <span class="live"><span class="dot"></span>working</span>
+          </div>
+          <div class="room-meta"><b>5</b> agents</div>
+        </header>
+        <div class="agent-zone"><svg class="agent-svg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" data-room-svg="brand"></svg></div>
+        <h3 class="room-title">Brand <em>Studio</em></h3>
+        <p class="room-sub">voice, aesthetic, the felt sense of SOMA</p>
+        <div class="room-status"><span class="status-pip"></span><em>Muse</em> just approved the v2 Quiet Nervous System cover.</div>
+      </div>
+    </article>
+
+    <!-- YouTube Studio -->
+    <article class="room is-active" data-tone="youtube" data-room="youtube">
+      <div class="room-photo"></div>
+      <div class="room-inner">
+        <header class="room-head">
+          <div class="room-eyebrow">
+            <span class="room-code">C · 03</span>
+            <span class="live"><span class="dot"></span>working</span>
+          </div>
+          <div class="room-meta"><b>6</b> agents</div>
+        </header>
+        <div class="agent-zone"><svg class="agent-svg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" data-room-svg="youtube"></svg></div>
+        <h3 class="room-title">YouTube <em>Studio</em></h3>
+        <p class="room-sub">the channel · script · voice · cuts · covers</p>
+        <div class="room-status"><span class="status-pip"></span><em>Verse</em> finished a 12-min script — sent to Chorus and Blade.</div>
+      </div>
+    </article>
+
+    <!-- Forges -->
+    <article class="room" data-tone="forges" data-room="forges">
+      <div class="room-photo"></div>
+      <div class="room-inner">
+        <header class="room-head">
+          <div class="room-eyebrow">
+            <span class="room-code">D · 04</span>
+            <span class="live"><span class="dot"></span>working</span>
+          </div>
+          <div class="room-meta"><b>5</b> agents</div>
+        </header>
+        <div class="agent-zone"><svg class="agent-svg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" data-room-svg="forges"></svg></div>
+        <h3 class="room-title">Forges</h3>
+        <p class="room-sub">where code is shaped, reviewed, repaired</p>
+        <div class="room-status"><span class="status-pip"></span>Quiet — <em>Repair</em> closed two tickets. Argus is reading auth.</div>
+      </div>
+    </article>
+
+    <!-- Research -->
+    <article class="room" data-tone="research" data-room="research">
+      <div class="room-photo"></div>
+      <div class="room-inner">
+        <header class="room-head">
+          <div class="room-eyebrow">
+            <span class="room-code">E · 05</span>
+            <span class="live"><span class="dot"></span>working</span>
+          </div>
+          <div class="room-meta"><b>5</b> agents</div>
+        </header>
+        <div class="agent-zone"><svg class="agent-svg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" data-room-svg="research"></svg></div>
+        <h3 class="room-title">Research</h3>
+        <p class="room-sub">scouts, sages, signal — what to make next</p>
+        <div class="room-status"><span class="status-pip"></span><em>Beacon</em> surfaced a rising query — "downshift before bed."</div>
+      </div>
+    </article>
+
+    <!-- Empty / add new sector -->
+    <article class="room empty" data-tone="empty" data-room="empty">
+      <div class="room-photo"></div>
+      <div class="room-inner">
+        <div class="plus" aria-hidden="true">+</div>
+        <div class="plus-label">Add a new sector</div>
+        <div class="plus-sub">A room takes shape when the studio outgrows the others. Tap to begin.</div>
+      </div>
+    </article>
+  </section>
+</main>
+
+<!-- ============================================================
+     RIGHT RAIL — events · approvals · summary · burn-down
+     ============================================================ -->
+<aside class="rail" aria-label="Live status">
+  <!-- Live event feed -->
+  <section class="rail-section feed">
+    <div class="rail-h">
+      <span class="rail-h-title">Live · the studio</span>
+      <span class="badge"><span id="feedCount">0</span> in last hour</span>
+    </div>
+    <div class="feed-list" id="feedList"></div>
+  </section>
+
+  <!-- Approval inbox -->
+  <section class="rail-section">
+    <div class="rail-h">
+      <span class="rail-h-title">Awaiting your call</span>
+      <span class="badge" id="approvalCt">3 need you</span>
+    </div>
+    <div class="approval">
+      <div>
+        <div class="approval-from">Helm · YouTube</div>
+        <div class="approval-text">Ship Episode 04 thumbnail — variant <em style="font-style:italic;color:var(--ember)">B</em>?</div>
+      </div>
+      <div class="approval-act">Open →</div>
+    </div>
+    <div class="approval">
+      <div>
+        <div class="approval-from">Atlas · Ops</div>
+        <div class="approval-text">Hire a second Verse instance for the script backlog?</div>
+      </div>
+      <div class="approval-act">Open →</div>
+    </div>
+    <div class="approval">
+      <div>
+        <div class="approval-from">Muse · Brand</div>
+        <div class="approval-text">New tagline rotation — review three drafts.</div>
+      </div>
+      <div class="approval-act">Open →</div>
+    </div>
+  </section>
+
+  <!-- Hourly summary toggle -->
+  <section class="rail-section">
+    <div class="rail-h">
+      <span class="rail-h-title">Hourly summary</span>
+    </div>
+    <div class="toggle">Voice digest <span class="switch on" data-toggle></span></div>
+    <div class="toggle">Push to phone <span class="switch on" data-toggle></span></div>
+    <div class="toggle">Quiet hours · 22–08 <span class="switch" data-toggle></span></div>
+  </section>
+
+  <!-- Per-agent budget burn -->
+  <section class="rail-section">
+    <div class="rail-h">
+      <span class="rail-h-title">Spend · 24h burn-down</span>
+      <span class="badge">$15.12</span>
+    </div>
+    <div class="burn">
+      <div class="burn-row">
+        <div class="burn-name"><span class="room-tag">A</span>Atlas Factory</div>
+        <div class="burn-amt">$4.10<span class="of"> / 12</span></div>
+        <div class="burn-bar"><div class="burn-bar-fill" style="width:34%"></div></div>
+      </div>
+      <div class="burn-row">
+        <div class="burn-name"><span class="room-tag">B</span>Brand Studio</div>
+        <div class="burn-amt">$3.20<span class="of"> / 8</span></div>
+        <div class="burn-bar"><div class="burn-bar-fill" style="width:40%"></div></div>
+      </div>
+      <div class="burn-row">
+        <div class="burn-name"><span class="room-tag">C</span>YouTube Studio</div>
+        <div class="burn-amt">$5.42<span class="of"> / 18</span></div>
+        <div class="burn-bar"><div class="burn-bar-fill" style="width:30%"></div></div>
+      </div>
+      <div class="burn-row">
+        <div class="burn-name"><span class="room-tag">D</span>Forges</div>
+        <div class="burn-amt">$1.80<span class="of"> / 7</span></div>
+        <div class="burn-bar"><div class="burn-bar-fill" style="width:26%"></div></div>
+      </div>
+      <div class="burn-row">
+        <div class="burn-name"><span class="room-tag">E</span>Research</div>
+        <div class="burn-amt">$0.60<span class="of"> / 5</span></div>
+        <div class="burn-bar"><div class="burn-bar-fill" style="width:12%"></div></div>
+      </div>
+    </div>
+  </section>
+</aside>
+
+<!-- ============================================================
+     SLIDE-OUT ROOM PANEL
+     ============================================================ -->
+<aside class="panel" id="panel" aria-hidden="true">
+  <header class="panel-head">
+    <div>
+      <div class="panel-eyebrow" id="pnEyebrow">Room</div>
+      <h2 class="panel-title" id="pnTitle">—</h2>
+      <p class="panel-sub" id="pnSub">—</p>
+    </div>
+    <button class="panel-close" id="pnClose" aria-label="Close">×</button>
+  </header>
+  <div class="panel-body">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="lbl">Hands</div><div class="val" id="pnOcc">5</div></div>
+      <div class="stat-card"><div class="lbl">Working</div><div class="val"><em id="pnWorking">3</em></div></div>
+      <div class="stat-card"><div class="lbl">In queue</div><div class="val" id="pnQueue">7</div></div>
+      <div class="stat-card"><div class="lbl">Spend · 24h</div><div class="val" id="pnSpend">$3.20</div></div>
+    </div>
+
+    <section>
+      <div class="panel-section-h"><span>Tickets</span><span class="ct" id="pnQueueCt">—</span></div>
+      <div id="pnTickets"></div>
+    </section>
+
+    <section>
+      <div class="panel-section-h"><span>The hands in this room</span></div>
+      <div class="agent-grid" id="pnAgents"></div>
+    </section>
+
+    <section class="recent">
+      <div class="panel-section-h"><span>Recently shipped</span></div>
+      <div id="pnActivity"></div>
+    </section>
+  </div>
+</aside>
+
+<!-- Tooltip element -->
+<div class="tt" id="tt"><div class="tt-name">—</div><div class="tt-role">—</div><div class="tt-status">—</div></div>
+
+<script>
+/* =============================================================
+   DATA — 5 sectors, ~26 agents, fake tickets/activity baked in
+   ============================================================= */
+const ROOMS = {
+  atlas: {
+    code:"A · 01", name:"Atlas Factory", titleEm:"Factory",
+    sub:"the room that runs the rooms",
+    spend:"$4.10",
+    agents:[
+      {id:"atlas",   name:"Atlas",    role:"Team lead — final say"},
+      {id:"nexus",   name:"Nexus",    role:"Decomposer · routing"},
+      {id:"sentinel",name:"Sentinel", role:"Final ship gate"},
+      {id:"echo",    name:"Echo",     role:"Mid-task reflector"},
+      {id:"critic",  name:"Critic",   role:"Second-opinion"},
+    ],
+    activeIds:["atlas","sentinel","nexus"],
+    tickets:[
+      {t:"Hire 2nd Verse instance · backlog of 3 scripts", m:"opened by Atlas · 14:02", s:"queue"},
+      {t:"Sentinel gate · Episode 04 ship", m:"running · Sentinel · 13:51", s:"run"},
+      {t:"Approve thumbnail variant B (Helm)", m:"awaiting Zak", s:"queue"},
+      {t:"Echo · 5-order reflection on Brand sweep", m:"closed · 13:30", s:"done"},
+      {t:"Cycle review · 218th heartbeat report", m:"queued · Atlas · 14:11", s:"queue"},
+    ],
+    activity:[
+      {at:"14:02", who:"Atlas",    msg:"opened a hire request for a second Verse — backlog ≥ 3 episodes."},
+      {at:"13:51", who:"Sentinel", msg:"verified Episode 04 against the brand bible · PASS."},
+      {at:"13:38", who:"Nexus",    msg:"decomposed the new launch brief into 9 work orders across 4 rooms."},
+      {at:"13:12", who:"Echo",     msg:"flagged drift — Brand drafts trending too clinical."},
+    ]
+  },
+  brand: {
+    code:"B · 02", name:"Brand Studio", titleEm:"Studio",
+    sub:"voice, aesthetic, the felt sense of SOMA",
+    spend:"$3.20",
+    agents:[
+      {id:"muse",    name:"Muse",    role:"Brand director · final gate"},
+      {id:"compass", name:"Compass", role:"Strategy · audience"},
+      {id:"scribe",  name:"Scribe",  role:"Copy · voice steward"},
+      {id:"canvas",  name:"Canvas",  role:"Visual designer"},
+      {id:"lens",    name:"Lens",    role:"Photo + art direction"},
+    ],
+    activeIds:["scribe","canvas","muse"],
+    tickets:[
+      {t:"New tagline rotation · 12 candidates → 3 finalists", m:"running · Scribe · 14:08", s:"run"},
+      {t:"Cover restyle · Quiet Nervous System v2", m:"running · Canvas · 13:55", s:"run"},
+      {t:"Photo set · twilight doorways", m:"queued · Lens · 13:40", s:"queue"},
+      {t:"Audience drift report · April → May", m:"closed · Compass · 12:00", s:"done"},
+      {t:"Bible patch · italic Fraunces guidance", m:"queued · Muse · 11:30", s:"queue"},
+    ],
+    activity:[
+      {at:"14:08", who:"Scribe",  msg:"shipped 12 tagline drafts to Muse for the rotation gate."},
+      {at:"13:55", who:"Canvas",  msg:"restyled the v2 cover — softer twilight, deeper ember frame."},
+      {at:"13:40", who:"Lens",    msg:"queued a photo set on 'thresholds' for next week's posts."},
+      {at:"12:00", who:"Compass", msg:"drift report — audience leaning more toward sleep + ritual queries."},
+    ]
+  },
+  youtube: {
+    code:"C · 03", name:"YouTube Studio", titleEm:"Studio",
+    sub:"the channel · script · voice · cuts · covers",
+    spend:"$5.42",
+    agents:[
+      {id:"helm",    name:"Helm",    role:"Channel director"},
+      {id:"verse",   name:"Verse",   role:"Long-form script"},
+      {id:"chorus",  name:"Chorus",  role:"Voice direction"},
+      {id:"blade",   name:"Blade",   role:"Editor · pacing"},
+      {id:"frame",   name:"Frame",   role:"Thumbnail design"},
+      {id:"beacon",  name:"Beacon",  role:"SEO · audience research"},
+    ],
+    activeIds:["verse","chorus","blade","frame"],
+    tickets:[
+      {t:"Episode 04 · 'Sleep as a practice, not a metric'", m:"running · Verse · 14:11", s:"run"},
+      {t:"VO render · ElevenLabs · 11min cut", m:"running · Chorus · 14:00", s:"run"},
+      {t:"Edit pass 02 · b-roll cues + music drop", m:"running · Blade · 13:50", s:"run"},
+      {t:"Thumbnail variant B · awaiting Zak", m:"queued · Frame · 13:45", s:"queue"},
+      {t:"Topic intel · trending 'nervous system reset'", m:"closed · Beacon · 13:12", s:"done"},
+      {t:"Title A/B · 6 variants for ep 05", m:"queued · Beacon · 14:05", s:"queue"},
+    ],
+    activity:[
+      {at:"14:11", who:"Verse",  msg:"finished a 12-minute script — sent to Chorus and Blade."},
+      {at:"14:00", who:"Chorus", msg:"rendered the VO at 0.92 pace · soft, low register."},
+      {at:"13:50", who:"Blade",  msg:"laid the edit · two breath beats added at 03:12 and 09:40."},
+      {at:"13:45", who:"Frame",  msg:"two thumbnail variants — sent variant B for your call."},
+      {at:"13:12", who:"Beacon", msg:"surfaced a rising query: 'how to downshift before bed.'"},
+    ]
+  },
+  forges: {
+    code:"D · 04", name:"Forges", titleEm:"Forges",
+    sub:"where code is shaped, reviewed, repaired",
+    spend:"$1.80",
+    agents:[
+      {id:"forge1",  name:"Forge·01", role:"Implementation"},
+      {id:"forge2",  name:"Forge·02", role:"Implementation"},
+      {id:"argus",   name:"Argus",    role:"Deep code review"},
+      {id:"repair",  name:"Repair",   role:"Fix-loop applier"},
+      {id:"seer",    name:"Seer",     role:"Root-cause diagnoser"},
+    ],
+    activeIds:["forge1","argus"],
+    tickets:[
+      {t:"Build Studio Floor mockup · v1", m:"running · Forge·01 · 14:05", s:"run"},
+      {t:"Refactor cost-tracker module", m:"closed · Forge·02 · 13:40", s:"done"},
+      {t:"Argus review · auth middleware sweep", m:"running · Argus · 13:20", s:"run"},
+      {t:"Critic pass · Soma Studio dispatcher v2", m:"closed · 13:00", s:"done"},
+      {t:"Repair · re-run tests after rename", m:"queued · Repair · 14:09", s:"queue"},
+    ],
+    activity:[
+      {at:"14:05", who:"Forge·01", msg:"shipping a single-file mockup to /soma-studio-mockups."},
+      {at:"13:40", who:"Forge·02", msg:"split the cost-tracker into a tiny pure module."},
+      {at:"13:20", who:"Argus",    msg:"queued a deep review on auth middleware — security-adjacent."},
+      {at:"13:00", who:"Critic",   msg:"flagged a missing fan-out on the dispatcher — Repair patched it."},
+    ]
+  },
+  research: {
+    code:"E · 05", name:"Research", titleEm:"Research",
+    sub:"scouts, sages, signal — what to make next",
+    spend:"$0.60",
+    agents:[
+      {id:"scout",   name:"Scout",  role:"Read-only search"},
+      {id:"sage",    name:"Sage",   role:"APIs · how-do-I"},
+      {id:"blitz",   name:"Blitz",  role:"Tests + build runner"},
+      {id:"vera",    name:"Vera",   role:"Pass/fail gate"},
+      {id:"ranger",  name:"Ranger", role:"Browser operator"},
+    ],
+    activeIds:["sage","scout"],
+    tickets:[
+      {t:"Sage · cheapest TTS for long form right now?", m:"running · Sage · 14:09", s:"run"},
+      {t:"Scout · find every place we read brand bible tokens", m:"closed · 14:04", s:"done"},
+      {t:"Seer · diagnose: thumbnail render fails on ratio 16:9", m:"closed · 13:30", s:"done"},
+      {t:"Blitz · re-run cover-builder smoke tests", m:"queued · 13:10", s:"queue"},
+      {t:"Ranger · sweep YouTube trending in our niche", m:"queued · 14:01", s:"queue"},
+    ],
+    activity:[
+      {at:"14:09", who:"Sage",  msg:"comparing six TTS providers · price-per-minute on long-form voice."},
+      {at:"14:04", who:"Scout", msg:"all 11 token consumers grepped — none stale."},
+      {at:"13:30", who:"Seer",  msg:"root-caused the 16:9 render fail · upstream PNG was 17:9."},
+      {at:"13:10", who:"Vera",  msg:"smoke gate passing on the cover builder — green."},
+    ]
+  }
+};
+
+/* =============================================================
+   AGENT DOTS — distribute inside each room's SVG box
+   ============================================================= */
+const NS = "http://www.w3.org/2000/svg";
+const tt = document.getElementById('tt');
+
+function distributePoints(n, w, h){
+  // Distribute n points in a soft constellation inside the box.
+  // Use a deterministic seeded pattern that feels organic but stays inside the
+  // box with safe margin.
+  const margin = 22;
+  const innerW = w - margin*2;
+  const innerH = h - margin*2;
+  const pts = [];
+  // Hand-tuned positions for 5 / 6 — feels intentional.
+  const presets = {
+    5:[ [0.18,0.30],[0.40,0.66],[0.65,0.22],[0.80,0.55],[0.30,0.82] ],
+    6:[ [0.18,0.28],[0.42,0.50],[0.30,0.78],[0.66,0.20],[0.80,0.50],[0.62,0.80] ],
+  };
+  const layout = presets[n] || Array.from({length:n}, (_,i)=>{
+    const a = (i / n) * Math.PI * 2;
+    return [0.5 + 0.32*Math.cos(a), 0.5 + 0.32*Math.sin(a)];
+  });
+  for(const [fx,fy] of layout){
+    pts.push({x: margin + fx*innerW, y: margin + fy*innerH});
+  }
+  return pts;
+}
+
+const ALL_AGENTS = {};
+function renderRoomAgents(){
+  document.querySelectorAll('svg.agent-svg').forEach(svg => {
+    const roomId = svg.getAttribute('data-room-svg');
+    const room = ROOMS[roomId];
+    if(!room) return;
+    const w = 200, h = 200;
+    const pts = distributePoints(room.agents.length, w, h);
+    room.agents.forEach((a,i) => {
+      const p = pts[i];
+      const g = document.createElementNS(NS,'g');
+      g.setAttribute('class','ag');
+      g.setAttribute('data-ag', a.id);
+      g.setAttribute('data-room', roomId);
+      g.setAttribute('transform', `translate(${p.x},${p.y})`);
+
+      const ring = document.createElementNS(NS,'circle');
+      ring.setAttribute('class','ag-ring');
+      ring.setAttribute('r', 7);
+      g.appendChild(ring);
+
+      const dot = document.createElementNS(NS,'circle');
+      dot.setAttribute('class','ag-dot');
+      dot.setAttribute('r', 3);
+      g.appendChild(dot);
+
+      const label = document.createElementNS(NS,'text');
+      label.setAttribute('class','ag-label');
+      label.setAttribute('x', 11);
+      label.setAttribute('y', 2.5);
+      label.textContent = a.name.toUpperCase();
+      g.appendChild(label);
+
+      svg.appendChild(g);
+
+      // hover tooltip + small entrance jitter
+      g.addEventListener('mouseenter', e => showTip(e, a, roomId));
+      g.addEventListener('mousemove', moveTip);
+      g.addEventListener('mouseleave', () => tt.classList.remove('is-show'));
+      g.addEventListener('click', ev => { ev.stopPropagation(); openRoom(roomId); });
+
+      ALL_AGENTS[a.id] = { ...a, room: roomId, node: g };
+    });
+    // mark active
+    room.activeIds.forEach(id => {
+      const node = svg.querySelector(`g.ag[data-ag="${id}"]`);
+      if(node) node.classList.add('is-active');
+    });
+  });
+}
+renderRoomAgents();
+
+function showTip(e, a, roomId){
+  tt.querySelector('.tt-name').textContent = a.name;
+  tt.querySelector('.tt-role').textContent = a.role;
+  const isActive = ROOMS[roomId].activeIds.includes(a.id);
+  tt.querySelector('.tt-status').textContent = (isActive ? 'working' : 'idle') + ' · room ' + ROOMS[roomId].code;
+  moveTip(e);
+  tt.classList.add('is-show');
+}
+function moveTip(e){
+  tt.style.left = e.clientX + 'px';
+  tt.style.top  = e.clientY + 'px';
+}
+
+/* =============================================================
+   ROOM PANEL OPEN / CLOSE
+   ============================================================= */
+const panel  = document.getElementById('panel');
+const pnClose= document.getElementById('pnClose');
+function openRoom(id){
+  const r = ROOMS[id];
+  if(!r) return;
+  document.getElementById('pnEyebrow').textContent = `Room ${r.code} · ${r.agents.length} hands`;
+  document.getElementById('pnTitle').innerHTML = r.name.replace(r.titleEm, `<em>${r.titleEm}</em>`);
+  document.getElementById('pnSub').textContent = r.sub;
+  document.getElementById('pnOcc').textContent = r.agents.length;
+  document.getElementById('pnWorking').textContent = r.activeIds.length;
+  document.getElementById('pnQueue').textContent = r.tickets.filter(t=>t.s==='queue').length;
+  document.getElementById('pnSpend').textContent = r.spend;
+  document.getElementById('pnQueueCt').textContent = `${r.tickets.length} total`;
+  document.getElementById('pnTickets').innerHTML = r.tickets.map(t => `
+    <div class="ticket">
+      <div>
+        <div class="t-title">${t.t}</div>
+        <div class="t-meta">${t.m}</div>
+      </div>
+      <div class="t-status ${t.s}">${t.s}</div>
+    </div>`).join('');
+  document.getElementById('pnAgents').innerHTML = r.agents.map(a => {
+    const initial = a.name.replace(/[^A-Za-z]/g,'').charAt(0).toUpperCase();
+    const active = r.activeIds.includes(a.id) ? 'is-active' : '';
+    const status = active ? 'Working' : 'Idle';
+    return `<div class="agent-card ${active}">
+      <div class="face">${initial}</div>
+      <div class="name">${a.name}</div>
+      <div class="role-line">${a.role}</div>
+      <div class="ag-status">${status}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('pnActivity').innerHTML = r.activity.map(x => `
+    <div class="r-row">
+      <span class="r-time">${x.at}</span>
+      <span><strong>${x.who}</strong> &nbsp;${x.msg}</span>
+    </div>`).join('');
+  panel.classList.add('is-open');
+  panel.setAttribute('aria-hidden','false');
+}
+function closePanel(){
+  panel.classList.remove('is-open');
+  panel.setAttribute('aria-hidden','true');
+}
+pnClose.addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closePanel(); });
+
+document.querySelectorAll('.room').forEach(el => {
+  el.addEventListener('click', () => {
+    const id = el.dataset.room;
+    if(id && id !== 'empty') openRoom(id);
+  });
+});
+
+/* =============================================================
+   GO / PAUSE TOGGLE
+   ============================================================= */
+const goBtn   = document.getElementById('goBtn');
+const goLabel = document.getElementById('goLabel');
+let working = true;
+goBtn.addEventListener('click', () => {
+  working = !working;
+  goBtn.classList.toggle('is-paused', !working);
+  goBtn.setAttribute('aria-pressed', String(working));
+  goLabel.innerHTML = working
+    ? 'Studio is <em>working</em>'
+    : 'Studio is <em>resting</em>';
+  document.querySelectorAll('.room.is-active').forEach(el => {
+    el.style.transition = 'opacity .6s ease';
+    el.style.opacity = working ? '1' : '0.62';
+  });
+});
+
+/* =============================================================
+   LIVE EVENT FEED — items slide in every 2-4s
+   ============================================================= */
+const feedList = document.getElementById('feedList');
+const feedCount = document.getElementById('feedCount');
+const FEED_TEMPLATES = [
+  {who:"SCRIBE",   room:"Brand",   msg:"shipped a tagline draft. <em>'come home to the body.'</em>"},
+  {who:"VERSE",    room:"YouTube", msg:"finished beat three of the Episode 05 outline."},
+  {who:"FRAME",    room:"YouTube", msg:"three thumbnail concepts ready · awaiting Helm gate."},
+  {who:"SCOUT",    room:"Research",msg:"surveyed 14 adjacent niches · three worth a closer look."},
+  {who:"BLADE",    room:"YouTube", msg:"laid two new b-roll cues at <em>03:12</em> and <em>09:40</em>."},
+  {who:"MUSE",     room:"Brand",   msg:"approved the v2 cover. <em>'softer twilight, deeper ember frame.'</em>"},
+  {who:"COMPASS",  room:"Brand",   msg:"audience drift report queued · April → May."},
+  {who:"BEACON",   room:"YouTube", msg:"rising query — <em>'how to downshift before bed.'</em>"},
+  {who:"ARGUS",    room:"Forges",  msg:"deep review on auth middleware — flagged one minor concern."},
+  {who:"REPAIR",   room:"Forges",  msg:"closed two tickets after the dispatcher patch."},
+  {who:"SAGE",     room:"Research",msg:"compared six TTS providers · ElevenLabs still wins on long-form."},
+  {who:"CHORUS",   room:"YouTube", msg:"rendered VO at 0.92 pace · low register, soft."},
+  {who:"NEXUS",    room:"Atlas",   msg:"decomposed the launch brief into nine work orders."},
+  {who:"SENTINEL", room:"Atlas",   msg:"verified Episode 04 against the bible — <em>PASS</em>."},
+  {who:"LENS",     room:"Brand",   msg:"queued a photo set on <em>'thresholds.'</em>"},
+  {who:"VERA",     room:"Research",msg:"smoke gate green · cover builder is clean."},
+  {who:"FORGE·01", room:"Forges",  msg:"shipped the studio-floor mockup to /soma-studio-mockups."},
+  {who:"ATLAS",    room:"Atlas",   msg:"opened a hire request for a second Verse · backlog ≥ 3 episodes."},
+];
+let liveCount = 27;
+feedCount.textContent = liveCount;
+function pad(n){ return n < 10 ? '0'+n : ''+n; }
+function nowLabel(){
+  const d = new Date();
+  return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+}
+function pushEvent(){
+  if(!working) return;
+  const tpl = FEED_TEMPLATES[Math.floor(Math.random()*FEED_TEMPLATES.length)];
+  const node = document.createElement('div');
+  node.className = 'event';
+  node.innerHTML = `
+    <div class="event-meta"><b>${tpl.who}</b><span>${tpl.room} · ${nowLabel()}</span></div>
+    <div class="event-text">${tpl.msg}</div>`;
+  feedList.insertBefore(node, feedList.firstChild);
+  // cap to 60 to keep DOM small
+  while(feedList.children.length > 60) feedList.removeChild(feedList.lastChild);
+  liveCount += 1;
+  feedCount.textContent = liveCount;
+}
+// seed three so the rail isn't empty on load
+pushEvent(); pushEvent(); pushEvent();
+function scheduleNext(){
+  const wait = 2000 + Math.random()*2200;
+  setTimeout(() => { pushEvent(); scheduleNext(); }, wait);
+}
+scheduleNext();
+
+/* =============================================================
+   GENTLE AGENT-DOT RE-LIGHTING — keeps rooms alive
+   ============================================================= */
+setInterval(() => {
+  if(!working) return;
+  // pick one room at random and toggle one inactive agent on for ~6s
+  const roomIds = Object.keys(ROOMS);
+  const r = ROOMS[ roomIds[ Math.floor(Math.random()*roomIds.length) ] ];
+  const idle = r.agents.filter(a => !r.activeIds.includes(a.id));
+  if(!idle.length) return;
+  const pick = idle[ Math.floor(Math.random()*idle.length) ];
+  const node = document.querySelector(`svg[data-room-svg="${r.name.split(' ')[0].toLowerCase().replace(/[^a-z]/g,'')}"]`); // not used
+  // safer lookup: use ALL_AGENTS
+  const ag = ALL_AGENTS[pick.id];
+  if(!ag) return;
+  ag.node.classList.add('is-active');
+  r.activeIds.push(pick.id);
+  setTimeout(() => {
+    ag.node.classList.remove('is-active');
+    r.activeIds = r.activeIds.filter(x => x !== pick.id);
+  }, 5000 + Math.random()*4500);
+}, 4200);
+
+/* =============================================================
+   Toggles in rail
+   ============================================================= */
+document.querySelectorAll('[data-toggle]').forEach(el => {
+  el.addEventListener('click', () => el.classList.toggle('on'));
+});
+
+/* =============================================================
+   Goal progress: tiny live tick to feel alive (cosmetic only)
+   ============================================================= */
+let goalPctVal = 14;
+const goalFillEl = document.getElementById('goalFill');
+const goalPctEl  = document.getElementById('goalPct');
+setInterval(() => {
+  if(!working) return;
+  goalPctVal = Math.min(99, goalPctVal + (Math.random() < 0.2 ? 1 : 0));
+  goalFillEl.style.width = goalPctVal + '%';
+  goalPctEl.textContent = goalPctVal + '%';
+}, 9000);
+</script>
+</body>
+</html>
+
+<!-- Tycoon-style Autonomous Agents -->
+<script>
+// Add agent sprites
+const agentData = [
+  { id: 'luna', class: '', pos: { x: 100, y: 100 } },
+  { id: 'pixie', class: 'pixie', pos: { x: 300, y: 100 } },
+  { id: 'sage', class: 'sage', pos: { x: 500, y: 100 } },
+  { id: 'kai', class: 'kai', pos: { x: 700, y: 100 } }
+];
+
+agentData.forEach(agent => {
+  const el = document.createElement('div');
+  el.className = `agent ${agent.class}`;
+  el.style.cssText = `position:absolute;left:${agent.pos.x}px;top:${agent.pos.y}px;width:32px;height:32px;background:url('/assets/agents-sprite.png') 0 0 no-repeat;background-size:32px;cursor:pointer;z-index:100;`;
+  if (agent.class === 'pixie') el.style.backgroundPosition = '-32px 0';
+  if (agent.class === 'sage') el.style.backgroundPosition = '-64px 0';
+  if (agent.class === 'kai') el.style.backgroundPosition = '-96px 0';
+  document.body.appendChild(el);
+});
+
+// Autonomous movement
+let agents = document.querySelectorAll('.agent');
+agents.forEach(agent => {
+  let timer = Math.random() * 2000 + 1000;
+  function update() {
+    timer -= 16;
+    if (timer <= 0) {
+      agent.style.transition = 'all 0.5s ease';
+      agent.style.transform = `translate(${Math.random() * 600}px, ${Math.random() * 400}px) scale(1)`;
+      agent.style.transform += ' scale(1.2)';
+      timer = Math.random() * 2000 + 1000;
+    }
+    requestAnimationFrame(update);
+  }
+  update();
+});
+</script>
+
+<!-- Token Optimization: Session Initialization -->
+<script>
+// Load optimization rules on startup
+const OPTIMIZATION_RULES = {
+  sessionInit: "Load only SOUL.md, USER.md, IDENTITY.md, and today's memory file",
+  modelRouting: "Use free tier by default, premium only for complex tasks",
+  rateLimits: "5s between API calls, 10s between searches, batch work"
+};
+console.log('Optimization loaded:', OPTIMIZATION_RULES.sessionInit);
+</script>

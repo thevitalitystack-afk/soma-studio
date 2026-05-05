@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { margin: 0; padding: 0; background: #000; color: #fff; font-family: 'Inter Tight', sans-serif; overflow: hidden; }
+  .station { 
+    position: fixed; inset: 0; 
+    background: 
+      radial-gradient(ellipse 60% 45% at 14% 8%, rgba(200,168,120,0.05), transparent 65%),
+      radial-gradient(ellipse 55% 50% at 92% 102%, rgba(80,90,110,0.05), transparent 70%),
+      linear-gradient(180deg,#08080a 0%,#000 100%);
+  }
+  .room { 
+    position: absolute; width: 150px; height: 150px; 
+    background: #111; border: 1px solid #333; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .room:nth-child(1) { top: 50px; left: 50px; }
+  .room:nth-child(2) { top: 50px; left: 250px; }
+  .room:nth-child(3) { top: 50px; left: 450px; }
+  .room:nth-child(4) { top: 250px; left: 50px; }
+  .room:nth-child(5) { top: 250px; left: 250px; }
+  .room:nth-child(6) { top: 250px; left: 450px; }
+  
+  .agent {
+    position: absolute; width: 32px; height: 32px;
+    background: url('/assets/agents-sprite.png') 0 0 no-repeat;
+    background-size: 32px auto;
+    pointer-events: none;
+    transition: transform 0.3s ease;
+  }
+  .agent.pixie { background-position: -32px 0; }
+  .agent.sage { background-position: -64px 0; }
+  .agent.kairo { background-position: -96px 0; }
+  
+  .status {
+    position: fixed; bottom: 20px; left: 20px;
+    background: rgba(10,10,12,0.9); padding: 12px 16px; border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #c8a878;
+  }
+</style>
+</head>
+<body>
+  <div class="station">
+    <div class="room" id="room1"></div>
+    <div class="room" id="room2"></div>
+    <div class="room" id="room3"></div>
+    <div class="room" id="room4"></div>
+    <div class="room" id="room5"></div>
+    <div class="room" id="room6"></div>
+  </div>
+  <div class="status" id="status">Initializing agents...</div>
+
+<script>
+// Tycoon-style autonomous agents
+const agents = [];
+const rooms = document.querySelectorAll('.room');
+
+class Agent {
+  constructor(el, name) {
+    this.el = el;
+    this.name = name;
+    this.room = Math.floor(Math.random() * rooms.length);
+    this.working = false;
+    this.workTimer = 0;
+    this.moveTimer = 0;
+    this.updatePosition();
+  }
+  
+  updatePosition() {
+    const room = rooms[this.room];
+    const x = room.offsetLeft + room.offsetWidth/2 - 16;
+    const y = room.offsetTop + room.offsetHeight/2 - 16;
+    this.el.style.transform = `translate(${x}px, ${y}px)`;
+  }
+  
+  work() {
+    this.working = true;
+    this.workTimer = Math.random() * 2000 + 1000;
+    this.el.style.transform += ' scale(1.2)';
+  }
+  
+  update() {
+    if (this.working) {
+      this.workTimer -= 16;
+      if (this.workTimer <= 0) {
+        this.working = false;
+        this.el.style.transform = this.el.style.transform.replace(' scale(1.2)', '');
+      }
+    } else {
+      this.moveTimer -= 16;
+      if (this.moveTimer <= 0) {
+        this.work();
+        this.room = Math.floor(Math.random() * rooms.length);
+        this.updatePosition();
+      }
+    }
+  }
+}
+
+// Initialize agents
+agents.push(new Agent(document.createElement('div'), 'Luna').el);
+document.body.appendChild(agents[0]);
+agents[0].classList.add('agent');
+
+agents.push(new Agent(document.createElement('div'), 'Pixie').el);
+document.body.appendChild(agents[1]);
+agents[1].classList.add('agent', 'pixie');
+
+agents.push(new Agent(document.createElement('div'), 'Sage').el);
+document.body.appendChild(agents[2]);
+agents[2].classList.add('agent', 'sage');
+
+agents.push(new Agent(document.createElement('div'), 'Kairo').el);
+document.body.appendChild(agents[3]);
+agents[3].classList.add('agent', 'kairo');
+
+// Animation loop
+function animate() {
+  agents.forEach(agent => agent.update());
+  document.getElementById('status').textContent = 
+    `Agents working: ${agents.filter(a => !a.working).length} active`;
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
