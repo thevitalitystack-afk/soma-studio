@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SOMA Studio — Dashboard</title>
+  <style>
+    /* =====================================================================
+       Design Tokens — Modern Dark Theme
+       ===================================================================== */
+    :root {
+      /* Base colors */
+      --bg: #0a0a0f;
+      --bg-elevated: #11111a;
+      --bg-card: #161622;
+      --surface: #1e1e28;
+      
+      /* Borders & dividers */
+      --border: #2a2a35;
+      --border-soft: #22222c;
+      --divider: rgba(255,255,255,0.03);
+      
+      /* Typography */
+      --text: #e8e6ed;
+      --text-secondary: #a8a4af;
+      --text-tertiary: #7a7680;
+      --text-muted: #5a565f;
+      
+      /* Brand accents */
+      --accent: #c8a878;
+      --accent-strong: #d6b88a;
+      --accent-soft: rgba(200,168,120,0.12);
+      --accent-line: rgba(200,168,120,0.25);
+      
+      /* Status colors */
+      --status-active: #a3ffb4;
+      --status-idle: #ffb968;
+      --status-off: #ff6b6b;
+      --status-working: #7fb8ff;
+      
+      /* Spacing scale */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --space-2xl: 24px;
+      --space-3xl: 32px;
+      
+      /* Radii */
+      --radius-sm: 6px;
+      --radius: 10px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+      
+      /* Transitions */
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    /* =====================================================================
+       Base Styles
+       ===================================================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
+      font-weight: 400;
+      letter-spacing: -0.005em;
+      line-height: 1.5;
+      height: 100%;
+      min-height: 100vh;
+      padding: var(--space-2xl);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* =====================================================================
+       Header Section
+       ===================================================================== */
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-3xl);
+      padding-bottom: var(--space-xl);
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      display: grid;
+      place-items: center;
+      font-family: serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 22px;
+      color: #0a0805;
+      box-shadow: 0 0 0 1px rgba(200,168,120,0.3), 0 0 24px -4px rgba(200,168,120,0.2);
+    }
+
+    .brand h1 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 300;
+      font-size: 28px;
+      letter-spacing: -0.015em;
+      color: var(--text);
+    }
+
+    .brand h1 em {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .subtitle {
+      color: var(--text-tertiary);
+      font-size: 14px;
+      font-weight: 300;
+    }
+
+    /* =====================================================================
+       Stats Bar
+       ===================================================================== */
+    .stats-bar {
+      display: flex;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-3xl);
+    }
+
+    .stat-pill {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      text-align: center;
+    }
+
+    .stat-pill .value {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 300;
+      font-size: 28px;
+      color: var(--text);
+      letter-spacing: -0.015em;
+      margin-bottom: var(--space-xs);
+    }
+
+    .stat-pill .value em {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .stat-pill .label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    /* =====================================================================
+       Agent Grid
+       ===================================================================== */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+
+    .section-eyebrow {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .section-eyebrow::before {
+      content: '';
+      width: 18px;
+      height: 1px;
+      background: var(--accent-line);
+    }
+
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-xl);
+    }
+
+    /* =====================================================================
+       Agent Cards
+       ===================================================================== */
+    .agent-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      transition: all 0.25s var(--ease);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .agent-card:hover {
+      border-color: var(--accent-line);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px -8px rgba(0,0,0,0.4);
+    }
+
+    .agent-card.is-active {
+      border-color: var(--accent-line);
+      box-shadow: inset 0 0 0 1px var(--accent-line), 0 8px 24px -4px rgba(200,168,120,0.1);
+    }
+
+    .agent-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-lg);
+    }
+
+    .agent-name {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 300;
+      font-size: 18px;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .agent-role {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 300;
+      margin-top: var(--space-xs);
+    }
+
+    /* =====================================================================
+       Status Badges
+       ===================================================================== */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: 20px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .status-badge.active {
+      background: rgba(163, 255, 180, 0.15);
+      color: var(--status-active);
+    }
+
+    .status-badge.idle {
+      background: rgba(255, 185, 104, 0.15);
+      color: var(--status-idle);
+    }
+
+    .status-badge.off {
+      background: rgba(255, 107, 107, 0.15);
+      color: var(--status-off);
+    }
+
+    .status-badge.working {
+      background: rgba(127, 184, 255, 0.15);
+      color: var(--status-working);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* =====================================================================
+       Progress Bars
+       ===================================================================== */
+    .progress-container {
+      margin-top: var(--space-lg);
+    }
+
+    .progress-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: var(--space-xs);
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.5s var(--ease);
+    }
+
+    /* =====================================================================
+       Footer
+       ===================================================================== */
+    .dashboard-footer {
+      margin-top: var(--space-3xl);
+      padding-top: var(--space-xl);
+      border-top: 1px solid var(--border-soft);
+      text-align: center;
+      color: var(--text-tertiary);
+      font-size: 13px;
+    }
+
+    .last-updated {
+      font-family: "JetBrains Mono", monospace;
+      color: var(--text-muted);
+    }
+
+    /* =====================================================================
+       Responsive
+       ===================================================================== */
+    @media (max-width: 768px) {
+      html, body {
+        padding: var(--space-lg);
+      }
+
+      .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-lg);
+        margin-bottom: var(--space-xl);
+      }
+
+      .stats-bar {
+        flex-direction: column;
+        margin-bottom: var(--space-xl);
+      }
+
+      .agents-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
+      }
+
+      .agent-card {
+        padding: var(--space-lg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background elements -->
+  <div class="bg-gradient"></div>
+  
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="brand">
+      <div class="logo">🌙</div>
+      <div>
+        <h1>SOMA <em>Studio</em></h1>
+        <p class="subtitle">Agent &amp; Video Pipeline — Wellness • Spirituality • Manifestation</p>
+      </div>
+    </div>
+    <div class="stats">
+      <span class="last-updated" id="lastUpdated">Loading...</span>
+    </div>
+  </header>
+
+  <!-- Daily Stats -->
+  <div class="stats-bar">
+    <div class="stat-pill">
+      <div class="value">$<span id="dailySpend">15.12</span></div>
+      <div class="label">Today's Spend</div>
+    </div>
+    <div class="stat-pill">
+      <div class="value"><span id="activeAgents">6</span>/<span id="totalAgents">26</span></div>
+      <div class="label">Active Agents</div>
+    </div>
+    <div class="stat-pill">
+      <div class="value"><span id="goalProgress">14</span>%</div>
+      <div class="label">Goal Progress</div>
+    </div>
+    <div class="stat-pill">
+      <div class="value"><span id="cycleCount">218</span></div>
+      <div class="label">Completed Cycles</div>
+    </div>
+  </div>
+
+  <!-- Agents Section -->
+  <section>
+    <div class="section-header">
+      <span class="section-eyebrow">The Studio Floor</span>
+    </div>
+    
+    <div class="agents-grid" id="agentsGrid">
+      <!-- Agent cards will be inserted here -->
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="dashboard-footer">
+    <span class="last-updated">Last updated: <span id="time"></span></span>
+  </footer>
+
+  <script>
+    // Agent data
+    const agents = [
+      {
+        id: 'pixie',
+        name: 'Pixie',
+        role: 'Ideation Engine',
+        status: 'working',
+        progress: 60
+      },
+      {
+        id: 'wander',
+        name: 'Wander',
+        role: 'Research Engine',
+        status: 'idle',
+        progress: 0
+      },
+      {
+        id: 'sage',
+        name: 'Sage',
+        role: 'Script Engine',
+        status: 'off',
+        progress: 0
+      },
+      {
+        id: 'tidy',
+        name: 'Tidy',
+        role: 'Production Planner',
+        status: 'off',
+        progress: 0
+      },
+      {
+        id: 'melo',
+        name: 'Melo',
+        role: 'Vibe & Music Engine',
+        status: 'off',
+        progress: 0
+      },
+      {
+        id: 'kairo',
+        name: 'Kairo',
+        role: 'Automation Engine',
+        status: 'off',
+        progress: 0
+      }
+    ];
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      renderAgents();
+      updateTime();
+      setInterval(updateTime, 1000);
+      setInterval(updateAgentStatuses, 5000);
+    });
+
+    function renderAgents() {
+      const grid = document.getElementById('agentsGrid');
+      grid.innerHTML = agents.map(agent => `
+        <div class="agent-card ${agent.status !== 'off' ? 'is-active' : ''}" id="${agent.id}-card">
+          <div class="agent-header">
+            <div>
+              <div class="agent-name">${agent.name}</div>
+              <div class="agent-role">${agent.role}</div>
+            </div>
+            <span class="status-badge ${agent.status}">
+              <span class="status-dot"></span>
+              ${agent.status}
+            </span>
+          </div>
+          <div class="progress-container">
+            <div class="progress-label">Progress</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="${agent.id}-progress" style="width: ${agent.progress}%"></div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateTime() {
+      document.getElementById('time').textContent = new Date().toLocaleString();
+    }
+
+    function updateAgentStatuses() {
+      // Simulate random status updates
+      agents.forEach(agent => {
+        const statuses = ['working', 'idle', 'off'];
+        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+        const randomProgress = randomStatus === 'working' ? Math.floor(Math.random() * 100) : 0;
+        
+        agent.status = randomStatus;
+        agent.progress = randomProgress;
+      });
+      
+      renderAgents();
+    }
+  </script>
+</body>
+</html>
