@@ -206,5 +206,6 @@ To use this dark theme:
 - **Main Dashboard:** `soma-dashboard-dark.html`
 - **Style Guide:** `SOMA_STYLE_GUIDE.md` (this file)
 
+
 ## Discord Team Tags
 To tag Atlas in Discord, always write exactly: <@1496055925822328832>
