@@ -432,49 +432,61 @@
   </footer>
 
   <script>
-    // Agent data
+    // Agent data - SOMA YouTube Pipeline
     const agents = [
       {
-        id: 'pixie',
-        name: 'Pixie',
-        role: 'Ideation Engine',
-        status: 'working',
-        progress: 60
-      },
-      {
-        id: 'wander',
-        name: 'Wander',
+        id: 'beacon',
+        name: 'BEACON',
         role: 'Research Engine',
+        status: 'working',
+        progress: 60,
+        task: 'Researching spirituality trends...',
+        output: 'Found 23 trending topics in manifestation niche'
+      },
+      {
+        id: 'helm',
+        name: 'HELM',
+        role: 'Direction Gate',
         status: 'idle',
-        progress: 0
+        progress: 0,
+        task: 'Waiting for research...',
+        output: 'Ready to approve concepts'
       },
       {
-        id: 'sage',
-        name: 'Sage',
-        role: 'Script Engine',
+        id: 'verse',
+        name: 'VERSE',
+        role: 'Script Writer',
         status: 'off',
-        progress: 0
+        progress: 0,
+        task: 'Idle',
+        output: 'Ready to write scripts'
       },
       {
-        id: 'tidy',
-        name: 'Tidy',
-        role: 'Production Planner',
+        id: 'chorus',
+        name: 'CHORUS',
+        role: 'Voice Director',
         status: 'off',
-        progress: 0
+        progress: 0,
+        task: 'Idle',
+        output: 'Ready for VO prompts'
       },
       {
-        id: 'melo',
-        name: 'Melo',
-        role: 'Vibe & Music Engine',
+        id: 'blade',
+        name: 'BLADE',
+        role: 'Video Editor',
         status: 'off',
-        progress: 0
+        progress: 0,
+        task: 'Idle',
+        output: 'Ready for edit decisions'
       },
       {
-        id: 'kairo',
-        name: 'Kairo',
-        role: 'Automation Engine',
+        id: 'frame',
+        name: 'FRAME',
+        role: 'Thumbnail Designer',
         status: 'off',
-        progress: 0
+        progress: 0,
+        task: 'Idle',
+        output: 'Ready for thumbnail concepts'
       }
     ];
 
