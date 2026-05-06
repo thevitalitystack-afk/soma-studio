@@ -69,3 +69,34 @@
 - **Month 3:** Scale + $500 revenue
 - **Month 6:** Multiple channels + $2K revenue
 - **Month 12:** $10K/month target
+
+## Agent Delegation Strategy
+
+**Primary Agents (Created by Me):**
+- **BEACON** - Research and trend analysis
+- **HELM** - Creative direction and approval
+- **VERSE** - Script writing and content creation
+- **CHORUS** - Voice synthesis and audio
+- **BLADE** - Video editing and production
+- **FRAME** - Thumbnail design and visual assets
+
+**Support Agents:**
+- **Hermes** - Communication and coordination
+- **MUSE** - Brand gate and final approvals
+- **RANGER** - Etsy automation (when needed)
+
+**Delegation Rules:**
+1. Research → BEACON
+2. Direction → HELM
+3. Writing → VERSE
+4. Voice → CHORUS
+5. Editing → BLADE
+6. Thumbnails → FRAME
+7. Coordination → Hermes
+8. Final approval → MUSE
+
+**Quality Standards:**
+- All work reviewed by HELM before finalization
+- MUSE has final kill/ship authority
+- Hermes coordinates between agents
+- Memory updated after each major task
